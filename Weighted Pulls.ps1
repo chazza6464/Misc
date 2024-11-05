@@ -5,7 +5,11 @@
     .NOTES
     I made this just to mess around with weighted probability.
     All card probabilities are made up and are probably not accurate.
+
+    I tried to make this work in PS 5.1, but arrays of hashtables are weird.
 #>
+
+#Requires -Version 7.0
 
 $CardsBaseSet = @(
     @{
