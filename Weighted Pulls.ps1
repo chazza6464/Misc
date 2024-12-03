@@ -1,656 +1,229 @@
 <#
     .SYNOPSIS
-    Simulates opening a pack of the Pokémon TCG's Base Set.
+    Simulates opening a pack of Pokémon TCG cards.
 
     .NOTES
     I made this just to mess around with weighted probability.
-    All card probabilities are made up and are probably not accurate.
+    All card weights are made up and are probably not accurate. I'd be shocked if they are.
 
-    I tried to make this work in PS 5.1, but arrays of hashtables are weird.
+    .NOTES
+    If a duplicate pull happens the first time a card is obtained, it does not display as NEW.
 #>
 
-#Requires -Version 7.0
+
+[CmdletBinding()]
+param (
+    [ValidateSet("BaseSet", "JungleSet")]
+    [string]$CurrentCollection = "BaseSet"
+)
+class Card {
+    [string]    $Name
+    [string]    $Rarity
+    [int]       $Number
+    [int]       $Weight
+    [int]       $Count
+
+    Card([string]$Name, [string]$Rarity, [int]$Number, [int]$Weight) {
+        $this.Name      = $Name
+        $this.Rarity    = $Rarity
+        $this.Number    = $Number
+        $this.Weight    = $Weight
+        $this.Count     = 0
+    }
+}
 
 $CardsBaseSet = @(
-    @{
-        Name    = "Alakazam"
-        Rarity  = "Holo Rare"
-        Number  = 1
-        Weight  = 1
-    },
-    @{
-        Name    = "Blastoise"
-        Rarity  = "Holo Rare"
-        Number  = 2
-        Weight  = 1
-    },
-    @{
-        Name    = "Chansey"
-        Rarity  = "Holo Rare"
-        Number  = 3
-        Weight  = 1
-    },
-    @{
-        Name    = "Charizard"
-        Rarity  = "Holo Rare"
-        Number  = 4
-        Weight  = 1
-    },
-    @{
-        Name    = "Clefairy"
-        Rarity  = "Holo Rare"
-        Number  = 5
-        Weight  = 1
-    },
-    @{
-        Name    = "Gyarados"
-        Rarity  = "Holo Rare"
-        Number  = 6
-        Weight  = 1
-    },
-    @{
-        Name    = "Hitmonchan"
-        Rarity  = "Holo Rare"
-        Number  = 7
-        Weight  = 1
-    },
-    @{
-        Name    = "Machamp"
-        Rarity  = "Holo Rare"
-        Number  = 8
-        Weight  = 1
-    },
-    @{
-        Name    = "Magneton"
-        Rarity  = "Holo Rare"
-        Number  = 9
-        Weight  = 1
-    },
-    @{
-        Name    = "Mewtwo"
-        Rarity  = "Holo Rare"
-        Number  = 10
-        Weight  = 1
-    },
-    @{
-        Name    = "Nidoking"
-        Rarity  = "Holo Rare"
-        Number  = 11
-        Weight  = 1
-    },
-    @{
-        Name    = "Ninetales"
-        Rarity  = "Holo Rare"
-        Number  = 12
-        Weight  = 1
-    },
-    @{
-        Name    = "Poliwrath"
-        Rarity  = "Holo Rare"
-        Number  = 13
-        Weight  = 1
-    },
-    @{
-        Name    = "Raichu"
-        Rarity  = "Holo Rare"
-        Number  = 14
-        Weight  = 1
-    },
-    @{
-        Name    = "Venusaur"
-        Rarity  = "Holo Rare"
-        Number  = 15
-        Weight  = 1
-    },
-    @{
-        Name    = "Zapdos"
-        Rarity  = "Holo Rare"
-        Number  = 16
-        Weight  = 1
-    },
-    @{
-        Name    = "Beedrill"
-        Rarity  = "Rare"
-        Number  = 17
-        Weight  = 5
-    },
-    @{
-        Name    = "Dragonair"
-        Rarity  = "Rare"
-        Number  = 18
-        Weight  = 5
-    },
-    @{
-        Name    = "Dugtrio"
-        Rarity  = "Rare"
-        Number  = 19
-        Weight  = 5
-    },
-    @{
-        Name    = "Electabuzz"
-        Rarity  = "Rare"
-        Number  = 20
-        Weight  = 5
-    },
-    @{
-        Name    = "Electrode"
-        Rarity  = "Rare"
-        Number  = 21
-        Weight  = 5
-    },
-    @{
-        Name    = "Pidgeotto"
-        Rarity  = "Rare"
-        Number  = 22
-        Weight  = 5
-    },
-    @{
-        Name    = "Arcanine"
-        Rarity  = "Uncommon"
-        Number  = 23
-        Weight  = 10
-    },
-    @{
-        Name    = "Charmeleon"
-        Rarity  = "Uncommon"
-        Number  = 24
-        Weight  = 10
-    },
-    @{
-        Name    = "Dewgong"
-        Rarity  = "Uncommon"
-        Number  = 25
-        Weight  = 10
-    },
-    @{
-        Name    = "Dratini"
-        Rarity  = "Uncommon"
-        Number  = 26
-        Weight  = 10
-    },
-    @{
-        Name    = "Farfetch'd"
-        Rarity  = "Uncommon"
-        Number  = 27
-        Weight  = 10
-    },
-    @{
-        Name    = "Growlithe"
-        Rarity  = "Uncommon"
-        Number  = 28
-        Weight  = 10
-    },
-    @{
-        Name    = "Haunter"
-        Rarity  = "Uncommon"
-        Number  = 29
-        Weight  = 10
-    },
-    @{
-        Name    = "Ivysaur"
-        Rarity  = "Uncommon"
-        Number  = 30
-        Weight  = 10
-    },
-    @{
-        Name    = "Jynx"
-        Rarity  = "Uncommon"
-        Number  = 31
-        Weight  = 10
-    },
-    @{
-        Name    = "Kadabra"
-        Rarity  = "Uncommon"
-        Number  = 32
-        Weight  = 10
-    },
-    @{
-        Name    = "Kakuna"
-        Rarity  = "Uncommon"
-        Number  = 33
-        Weight  = 10
-    },
-    @{
-        Name    = "Machoke"
-        Rarity  = "Uncommon"
-        Number  = 34
-        Weight  = 10
-    },
-    @{
-        Name    = "Magikarp"
-        Rarity  = "Uncommon"
-        Number  = 35
-        Weight  = 10
-    },
-    @{
-        Name    = "Magmar"
-        Rarity  = "Uncommon"
-        Number  = 36
-        Weight  = 10
-    },
-    @{
-        Name    = "Nidorino"
-        Rarity  = "Uncommon"
-        Number  = 37
-        Weight  = 10
-    },
-    @{
-        Name    = "Poliwhirl"
-        Rarity  = "Uncommon"
-        Number  = 38
-        Weight  = 10
-    },
-    @{
-        Name    = "Porygon"
-        Rarity  = "Uncommon"
-        Number  = 39
-        Weight  = 10
-    },
-    @{
-        Name    = "Raticate"
-        Rarity  = "Uncommon"
-        Number  = 40
-        Weight  = 10
-    },
-    @{
-        Name    = "Seel"
-        Rarity  = "Uncommon"
-        Number  = 41
-        Weight  = 10
-    },
-    @{
-        Name    = "Wartortle"
-        Rarity  = "Uncommon"
-        Number  = 42
-        Weight  = 10
-    },
-    @{
-        Name    = "Abra"
-        Rarity  = "Common"
-        Number  = 43
-        Weight  = 25
-    },
-    @{
-        Name    = "Bulbasaur"
-        Rarity  = "Common"
-        Number  = 44
-        Weight  = 25
-    },
-    @{
-        Name    = "Caterpie"
-        Rarity  = "Common"
-        Number  = 45
-        Weight  = 25
-    },
-    @{
-        Name    = "Charmander"
-        Rarity  = "Common"
-        Number  = 46
-        Weight  = 25
-    },
-    @{
-        Name    = "Diglett"
-        Rarity  = "Common"
-        Number  = 47
-        Weight  = 25
-    },
-    @{
-        Name    = "Doduo"
-        Rarity  = "Common"
-        Number  = 48
-        Weight  = 25
-    },
-    @{
-        Name    = "Drowzee"
-        Rarity  = "Common"
-        Number  = 49
-        Weight  = 25
-    },
-    @{
-        Name    = "Gastly"
-        Rarity  = "Common"
-        Number  = 50
-        Weight  = 25
-    },
-    @{
-        Name    = "Koffing"
-        Rarity  = "Common"
-        Number  = 51
-        Weight  = 25
-    },
-    @{
-        Name    = "Machop"
-        Rarity  = "Common"
-        Number  = 52
-        Weight  = 25
-    },
-    @{
-        Name    = "Magnemite"
-        Rarity  = "Common"
-        Number  = 53
-        Weight  = 25
-    },
-    @{
-        Name    = "Metapod"
-        Rarity  = "Common"
-        Number  = 54
-        Weight  = 25
-    },
-    @{
-        Name    = "Nidoran (Male)"
-        Rarity  = "Common"
-        Number  = 55
-        Weight  = 25
-    },
-    @{
-        Name    = "Onix"
-        Rarity  = "Common"
-        Number  = 56
-        Weight  = 25
-    },
-    @{
-        Name    = "Pidgey"
-        Rarity  = "Common"
-        Number  = 57
-        Weight  = 25
-    },
-    @{
-        Name    = "Pikachu"
-        Rarity  = "Common"
-        Number  = 58
-        Weight  = 25
-    },
-    @{
-        Name    = "Poliwag"
-        Rarity  = "Common"
-        Number  = 59
-        Weight  = 25
-    },
-    @{
-        Name    = "Ponyta"
-        Rarity  = "Common"
-        Number  = 60
-        Weight  = 25
-    },
-    @{
-        Name    = "Rattata"
-        Rarity  = "Common"
-        Number  = 61
-        Weight  = 25
-    },
-    @{
-        Name    = "Sandshrew"
-        Rarity  = "Common"
-        Number  = 62
-        Weight  = 25
-    },
-    @{
-        Name    = "Squirtle"
-        Rarity  = "Common"
-        Number  = 63
-        Weight  = 25
-    },
-    @{
-        Name    = "Starmie"
-        Rarity  = "Common"
-        Number  = 64
-        Weight  = 25
-    },
-    @{
-        Name    = "Staryu"
-        Rarity  = "Common"
-        Number  = 65
-        Weight  = 25
-    },
-    @{
-        Name    = "Tangela"
-        Rarity  = "Common"
-        Number  = 66
-        Weight  = 25
-    },
-    @{
-        Name    = "Voltorb"
-        Rarity  = "Common"
-        Number  = 67
-        Weight  = 25
-    },
-    @{
-        Name    = "Vulpix"
-        Rarity  = "Common"
-        Number  = 68
-        Weight  = 25
-    },
-    @{
-        Name    = "Weedle"
-        Number  = 69
-        Rarity  = "Common"
-        Weight  = 25
-    },
-    @{
-        Name    = "Trainer - Clefairy Doll"
-        Number  = 70
-        Rarity  = "Rare"
-        Weight  = 5
-    },
-    @{
-        Name    = "Trainer - Computer Search"
-        Number  = 71
-        Rarity  = "Rare"
-        Weight  = 5
-    },
-    @{
-        Name    = "Trainer - Devolution Spray"
-        Rarity  = "Rare"
-        Number  = 72
-        Weight  = 5
-    },
-    @{
-        Name    = "Trainer - Impostor Professor Oak"
-        Number  = 73
-        Rarity  = "Rare"
-        Weight  = 5
-    },
-    @{
-        Name    = "Trainer - Item Finder"
-        Number  = 74
-        Rarity  = "Rare"
-        Weight  = 5
-    },
-    @{
-        Name    = "Trainer - Lass"
-        Rarity  = "Rare"
-        Number  = 75
-        Weight  = 5
-    },
-    @{
-        Name    = "Trainer - Pokemon Breeder"
-        Rarity  = "Rare"
-        Number  = 76
-        Weight  = 5
-    },
-    @{
-        Name    = "Trainer - Pokemon Trader"
-        Number  = 77
-        Rarity  = "Rare"
-        Weight  = 5
-    },
-    @{
-        Name    = "Trainer - Scoop Up"
-        Number  = 78
-        Rarity  = "Rare"
-        Weight  = 5
-    },
-    @{
-        Name    = "Trainer - Super Energy Removal"
-        Number  = 79
-        Rarity  = "Rare"
-        Weight  = 5
-    },
-    @{
-        Name    = "Trainer - Defender"
-        Number  = 80
-        Rarity  = "Uncommon"
-        Weight  = 10
-    },
-    @{
-        Name    = "Trainer - Energy Retrieval"
-        Number  = 81
-        Rarity  = "Uncommon"
-        Weight  = 10
-    },
-    @{
-        Name    = "Trainer - Full Heal"
-        Number  = 82
-        Rarity  = "Uncommon"
-        Weight  = 10
-    },
-    @{
-        Name    = "Trainer - Maintenance"
-        Number  = 83
-        Rarity  = "Uncommon"
-        Weight  = 10
-    },
-    @{
-        Name    = "Trainer - PlusPower"
-        Number  = 84
-        Rarity  = "Uncommon"
-        Weight  = 10
-    },
-    @{
-        Name    = "Trainer - Pokemon Center"
-        Number  = 85
-        Rarity  = "Uncommon"
-        Weight  = 10
-    },
-    @{
-        Name    = "Trainer - Pokemon Flute"
-        Number  = 86
-        Rarity  = "Uncommon"
-        Weight  = 10
-    },
-    @{
-        Name    = "Trainer - Pokedex"
-        Number  = 87
-        Rarity  = "Uncommon"
-        Weight  = 10
-    },
-    @{
-        Name    = "Trainer - Professor Oak"
-        Number  = 88
-        Rarity  = "Uncommon"
-        Weight  = 10
-    },
-    @{
-        Name    = "Trainer - Revive"
-        Number  = 89
-        Rarity  = "Uncommon"
-        Weight  = 10
-    },
-    @{
-        Name    = "Trainer - Super Potion"
-        Number  = 90
-        Rarity  = "Uncommon"
-        Weight  = 10
-    },
-    @{
-        Name    = "Trainer - Bill"
-        Number  = 91
-        Rarity  = "Common"
-        Weight  = 25
-    },
-    @{
-        Name    = "Trainer - Energy Removal"
-        Number  = 92
-        Rarity  = "Common"
-        Weight  = 25
-    },
-    @{
-        Name    = "Trainer - Gust of Wind"
-        Number  = 93
-        Rarity  = "Common"
-        Weight  = 25
-    },
-    @{
-        Name    = "Trainer - Potion"
-        Number  = 94
-        Rarity  = "Common"
-        Weight  = 25
-    },
-    @{
-        Name    = "Trainer - Switch"
-        Number  = 95
-        Rarity  = "Common"
-        Weight  = 25
-    },
-    @{
-        Name    = "Energy - Double Colorless"
-        Number  = 96
-        Rarity  = "Uncommon"
-        Weight  = 10
-    },
-    @{
-        Name    = "Energy - Fighting"
-        Number  = 97
-        Rarity  = "Common"
-        Weight  = 25
-    },
-    @{
-        Name    = "Energy - Fire"
-        Number  = 98
-        Rarity  = "Common"
-        Weight  = 25
-    },
-    @{
-        Name    = "Energy - Grass"
-        Number  = 99
-        Rarity  = "Common"
-        Weight  = 25
-    },
-    @{
-        Name    = "Energy - Electric"
-        Number  = 100
-        Rarity  = "Common"
-        Weight  = 25
-    },
-    @{
-        Name    = "Energy - Psychic"
-        Number  = 101
-        Rarity  = "Common"
-        Weight  = 25
-    },
-    @{
-        Name    = "Energy - Water"
-        Number  = 102
-        Rarity  = "Common"
-        Weight  = 25
-    }
+    #           Name                                Rarity          Number  Weight
+    [Card]::new("Alakazam",                         "Holo Rare",    1,      1)
+    [Card]::new("Blastoise",                        "Holo Rare",    2,      1)
+    [Card]::new("Chansey",                          "Holo Rare",    3,      1)
+    [Card]::new("Charizard",                        "Holo Rare",    4,      1)
+    [Card]::new("Clefairy",                         "Holo Rare",    5,      1)
+    [Card]::new("Gyarados",                         "Holo Rare",    6,      1)
+    [Card]::new("Hitmonchan",                       "Holo Rare",    7,      1)
+    [Card]::new("Machamp",                          "Holo Rare",    8,      1)
+    [Card]::new("Magneton",                         "Holo Rare",    9,      1)
+    [Card]::new("Mewtwo",                           "Holo Rare",    10,     1)
+    [Card]::new("Nidoking",                         "Holo Rare",    11,     1)
+    [Card]::new("Ninetales",                        "Holo Rare",    12,     1)
+    [Card]::new("Poliwrath",                        "Holo Rare",    13,     1)
+    [Card]::new("Raichu",                           "Holo Rare",    14,     1)
+    [Card]::new("Venusaur",                         "Holo Rare",    15,     1)
+    [Card]::new("Zapdos",                           "Holo Rare",    16,     1)
+    [Card]::new("Beedrill",                         "Rare",         17,     10)
+    [Card]::new("Dragonair",                        "Rare",         18,     10)
+    [Card]::new("Dugtrio",                          "Rare",         19,     10)
+    [Card]::new("Electabuzz",                       "Rare",         20,     10)
+    [Card]::new("Electrode",                        "Rare",         21,     10)
+    [Card]::new("Pidgeotto",                        "Rare",         22,     10)
+    [Card]::new("Arcanine",                         "Uncommon",     23,     25)
+    [Card]::new("Charmeleon",                       "Uncommon",     24,     25)
+    [Card]::new("Dewgong",                          "Uncommon",     25,     25)
+    [Card]::new("Dratini",                          "Uncommon",     26,     25)
+    [Card]::new("Farfetch'd",                       "Uncommon",     27,     25)
+    [Card]::new("Growlithe",                        "Uncommon",     28,     25)
+    [Card]::new("Haunter",                          "Uncommon",     29,     25)
+    [Card]::new("Ivysaur",                          "Uncommon",     30,     25)
+    [Card]::new("Jynx",                             "Uncommon",     31,     25)
+    [Card]::new("Kadabra",                          "Uncommon",     32,     25)
+    [Card]::new("Kakuna",                           "Uncommon",     33,     25)
+    [Card]::new("Machoke",                          "Uncommon",     34,     25)
+    [Card]::new("Magikarp",                         "Uncommon",     35,     25)
+    [Card]::new("Magmar",                           "Uncommon",     36,     25)
+    [Card]::new("Nidorino",                         "Uncommon",     37,     25)
+    [Card]::new("Poliwhirl",                        "Uncommon",     38,     25)
+    [Card]::new("Porygon",                          "Uncommon",     39,     25)
+    [Card]::new("Raticate",                         "Uncommon",     40,     25)
+    [Card]::new("Seel",                             "Uncommon",     41,     25)
+    [Card]::new("Wartortle",                        "Uncommon",     42,     25)
+    [Card]::new("Abra",                             "Common",       43,     75)
+    [Card]::new("Bulbasaur",                        "Common",       44,     75)
+    [Card]::new("Caterpie",                         "Common",       45,     75)
+    [Card]::new("Charmander",                       "Common",       46,     75)
+    [Card]::new("Diglett",                          "Common",       47,     75)
+    [Card]::new("Doduo",                            "Common",       48,     75)
+    [Card]::new("Drowzee",                          "Common",       49,     75)
+    [Card]::new("Gastly",                           "Common",       50,     75)
+    [Card]::new("Koffing",                          "Common",       51,     75)
+    [Card]::new("Machop",                           "Common",       52,     75)
+    [Card]::new("Magnemite",                        "Common",       53,     75)
+    [Card]::new("Metapod",                          "Common",       54,     75)
+    [Card]::new("Nidoran ♂",                        "Common",       55,     75)
+    [Card]::new("Onix",                             "Common",       56,     75)
+    [Card]::new("Pidgey",                           "Common",       57,     75)
+    [Card]::new("Pikachu",                          "Common",       58,     75)
+    [Card]::new("Poliwag",                          "Common",       59,     75)
+    [Card]::new("Ponyta",                           "Common",       60,     75)
+    [Card]::new("Rattata",                          "Common",       61,     75)
+    [Card]::new("Sandshrew",                        "Common",       62,     75)
+    [Card]::new("Squirtle",                         "Common",       63,     75)
+    [Card]::new("Starmie",                          "Common",       64,     75)
+    [Card]::new("Staryu",                           "Common",       65,     75)
+    [Card]::new("Tangela",                          "Common",       66,     75)
+    [Card]::new("Voltorb",                          "Common",       67,     75)
+    [Card]::new("Vulpix",                           "Common",       68,     75)
+    [Card]::new("Weedle",                           "Common",       69,     75)
+    [Card]::new("Trainer - Clefairy Doll",          "Rare",         70,     10)
+    [Card]::new("Trainer - Computer Search",        "Rare",         71,     10)
+    [Card]::new("Trainer - Devolution Spray",       "Rare",         72,     10)
+    [Card]::new("Trainer - Impostor Professor Oak", "Rare",         73,     10)
+    [Card]::new("Trainer - Item Finder",            "Rare",         74,     10)
+    [Card]::new("Trainer - Lass",                   "Rare",         75,     10)
+    [Card]::new("Trainer - Pokémon Breeder",        "Rare",         76,     10)
+    [Card]::new("Trainer - Pokémon Trader",         "Rare",         77,     10)
+    [Card]::new("Trainer - Scoop Up",               "Rare",         78,     10)
+    [Card]::new("Trainer - Super Energy Removal",   "Rare",         79,     10)
+    [Card]::new("Trainer - Defender",               "Uncommon",     80,     25)
+    [Card]::new("Trainer - Energy Retrieval",       "Uncommon",     81,     25)
+    [Card]::new("Trainer - Full Heal",              "Uncommon",     82,     25)
+    [Card]::new("Trainer - Maintenance",            "Uncommon",     83,     25)
+    [Card]::new("Trainer - PlusPower",              "Uncommon",     84,     25)
+    [Card]::new("Trainer - Pokémon Center",         "Uncommon",     85,     25)
+    [Card]::new("Trainer - Pokémon Flute",          "Uncommon",     86,     25)
+    [Card]::new("Trainer - Pokédex",                "Uncommon",     87,     25)
+    [Card]::new("Trainer - Professor Oak",          "Uncommon",     88,     25)
+    [Card]::new("Trainer - Revive",                 "Uncommon",     89,     25)
+    [Card]::new("Trainer - Super Potion",           "Uncommon",     90,     25)
+    [Card]::new("Trainer - Bill",                   "Common",       91,     75)
+    [Card]::new("Trainer - Energy Removal",         "Common",       92,     75)
+    [Card]::new("Trainer - Gust of Wind",           "Common",       93,     75)
+    [Card]::new("Trainer - Potion",                 "Common",       94,     75)
+    [Card]::new("Trainer - Switch",                 "Common",       95,     75)
+    [Card]::new("Energy - Double Colorless",        "Common",       96,     75)
+    [Card]::new("Energy - Fighting",                "Common",       97,     75)
+    [Card]::new("Energy - Fire",                    "Common",       98,     75)
+    [Card]::new("Energy - Grass",                   "Common",       99,     75)
+    [Card]::new("Energy - Electric",                "Common",       100,    75)
+    [Card]::new("Energy - Psychic",                 "Common",       101,    75)
+    [Card]::new("Energy - Water",                   "Common",       102,    75)
+)
+
+$CardsJungleSet = @(
+    #           Name                                Rarity          Number  Weight
+    [Card]::new("Clefable",                         "Holo Rare",    1,      1)
+    [Card]::new("Electrode",                        "Holo Rare",    2,      1)
+    [Card]::new("Flareon",                          "Holo Rare",    3,      1)
+    [Card]::new("Jolteon",                          "Holo Rare",    4,      1)
+    [Card]::new("Kangaskhan",                       "Holo Rare",    5,      1)
+    [Card]::new("Mr. Mime",                         "Holo Rare",    6,      1)
+    [Card]::new("Nidoqueen",                        "Holo Rare",    7,      1)
+    [Card]::new("Pidgeot",                          "Holo Rare",    8,      1)
+    [Card]::new("Pinsir",                           "Holo Rare",    9,      1)
+    [Card]::new("Scyther",                          "Holo Rare",    10,     1)
+    [Card]::new("Snorlax",                          "Holo Rare",    11,     1)
+    [Card]::new("Vaporeon",                         "Holo Rare",    12,     1)
+    [Card]::new("Venomoth",                         "Holo Rare",    13,     1)
+    [Card]::new("Victreebel",                       "Holo Rare",    14,     1)
+    [Card]::new("Vileplume",                        "Holo Rare",    15,     1)
+    [Card]::new("Wigglytuff",                       "Holo Rare",    16,     1)
+    [Card]::new("Clefable",                         "Rare",         17,     10)
+    [Card]::new("Electrode",                        "Rare",         18,     10)
+    [Card]::new("Flareon",                          "Rare",         19,     10)
+    [Card]::new("Jolteon",                          "Rare",         20,     10)
+    [Card]::new("Kanghaskhan",                      "Rare",         21,     10)
+    [Card]::new("Mr. Mime",                         "Rare",         22,     10)
+    [Card]::new("Nidoqueen",                        "Rare",         23,     10)
+    [Card]::new("Pidgeot",                          "Rare",         24,     10)
+    [Card]::new("Pinsir",                           "Rare",         25,     10)
+    [Card]::new("Scyther",                          "Rare",         26,     10)
+    [Card]::new("Snorlax",                          "Rare",         27,     10)
+    [Card]::new("Vaporeon",                         "Rare",         28,     10)
+    [Card]::new("Venomoth",                         "Rare",         29,     10)
+    [Card]::new("Victreebel",                       "Rare",         30,     10)
+    [Card]::new("Vileplume",                        "Rare",         31,     10)
+    [Card]::new("Wigglytuff",                       "Rare",         32,     10)
+    [Card]::new("Butterfree",                       "Uncommon",     33,     25)
+    [Card]::new("Dodrio",                           "Uncommon",     34,     25)
+    [Card]::new("Exeggutor",                        "Uncommon",     35,     25)
+    [Card]::new("Fearow",                           "Uncommon",     36,     25)
+    [Card]::new("Gloom",                            "Uncommon",     37,     25)
+    [Card]::new("Lickitung",                        "Uncommon",     38,     25)
+    [Card]::new("Marowak",                          "Uncommon",     39,     25)
+    [Card]::new("Nidorina",                         "Uncommon",     40,     25)
+    [Card]::new("Parasect",                         "Uncommon",     41,     25)
+    [Card]::new("Persian",                          "Uncommon",     42,     25)
+    [Card]::new("Primeape",                         "Uncommon",     43,     25)
+    [Card]::new("Rapidash",                         "Uncommon",     44,     25)
+    [Card]::new("Rhydon",                           "Uncommon",     45,     25)
+    [Card]::new("Seaking",                          "Uncommon",     46,     25)
+    [Card]::new("Tauros",                           "Uncommon",     47,     25)
+    [Card]::new("Weepinbell",                       "Uncommon",     48,     25)
+    [Card]::new("Bellsprout",                       "Common",       49,     75)
+    [Card]::new("Cubone",                           "Common",       50,     75)
+    [Card]::new("Eevee",                            "Common",       51,     75)
+    [Card]::new("Exeggute",                         "Common",       52,     75)
+    [Card]::new("Goldeen",                          "Common",       53,     75)
+    [Card]::new("Jigglypuff",                       "Common",       54,     75)
+    [Card]::new("Mankey",                           "Common",       55,     75)
+    [Card]::new("Meowth",                           "Common",       56,     75)
+    [Card]::new("Nidoran ♀",                        "Common",       57,     75)
+    [Card]::new("Oddish",                           "Common",       58,     75)
+    [Card]::new("Paras",                            "Common",       59,     75)
+    [Card]::new("Pikachu",                          "Common",       60,     75)
+    [Card]::new("Rhyhorn",                          "Common",       61,     75)
+    [Card]::new("Spearow",                          "Common",       62,     75)
+    [Card]::new("Venonat",                          "Common",       63,     75)
+    [Card]::new("Poké Ball",                        "Common",       64,     75)
 )
 
 function Get-RandomCard {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
-        [array]$CardPool,
-        [int]$Count = 1
+        [array]$CardPool
     )
 
-    $TotalWeight = ($CardPool | Measure-Object -Property Weight -Sum).Sum
-    $DrawnCards = @()
+    $FullWeight = ($CardPool | Measure-Object -Property Weight -Sum).Sum
+    $Random     = Get-Random -Minimum 0 -Maximum $FullWeight
+    $Work       = 0
 
-    for ($i = 0; $i -lt $Count; $i++) {
-        $RandomNumber       = Get-Random -Minimum 0 -Maximum $TotalWeight
-        $CumulativeWeight   = 0
-
-        foreach ($Card in $CardPool) {
-            $CumulativeWeight += $Card.Weight
-            if ($RandomNumber -lt $CumulativeWeight) {
-                $DrawnCards += $Card
-                break
-            }
+    foreach ($Card in $CardPool) {
+        $Work += $Card.Weight
+        if ($Random -lt $Work) {
+            $Card.Count += 1
+            return $Card
         }
     }
-
-    return $DrawnCards | Sort-Object -Property { $RarityOrder.IndexOf($_.Rarity) }, { [int]$_.Number } | Select-Object -Property Number, Name, Rarity
 }
 
 function Get-BoosterPack {
@@ -658,33 +231,91 @@ function Get-BoosterPack {
     param (
         [Parameter(Mandatory)]
         [array]$CardPool,
-        [int]$PackSize = 10,
-        [int]$NonCommonsAllowed
+        [int]$PackSize = 10
     )
 
-    if ($null -eq $NonCommonsAllowed) { $NonCommonsAllowed = Get-Random -Minimum 3 -Maximum 5 }
-    $BoosterPack = @(
-        Get-RandomCard -CardPool $CardPool -Count ($PackSize - $NonCommonsAllowed)
-        Get-RandomCard -CardPool ($CardPool | Where-Object { $_.Rarity -eq "Uncommon" }) -Count ($NonCommonsAllowed - 1)
-    )
-
-    if ((Get-Random -Minimum 0 -Maximum 5) -eq 1) {
-        $BoosterPack += @(
-            Get-RandomCard -CardPool ($CardPool | Where-Object { $_.Rarity -eq "Holo Rare" }) -Count 1
-        )
-    }
-    else {
-        $BoosterPack += @(
-            Get-RandomCard -CardPool ($CardPool | Where-Object { $_.Rarity -eq "Rare" }) -Count 1
-        )
+    $Pack = @()
+    for ($i = 0; $i -lt $PackSize; $i++) {
+        $Pack += Get-RandomCard -CardPool $CardPool
     }
 
-    return $BoosterPack | Sort-Object -Property { $RarityOrder.IndexOf($_.Rarity) }, { [int]$_.Number } | Select-Object -Property Number, Name, Rarity
+    return ($Pack | Sort-Object -Property {$RarityOrder.IndexOf($_.Rarity)}, {[int]$_.Number})
 }
 
 
 
-$RarityOrder = "Common", "Uncommon", "Rare", "Holo Rare"
 
-Clear-Host
-Get-BoosterPack -CardPool $CardsBaseSet
+
+$RarityOrder = "Common", "Uncommon", "Rare", "Holo Rare"
+do {
+    switch ($CurrentCollection) {
+        "BaseSet"   { $DisplayName = "Pokémon TCG Base Set";    $Cards = $CardsBaseSet      }
+        "JungleSet" { $DisplayName = "Pokémon TCG Jungle Set";  $Cards = $CardsJungleSet    }
+    }
+
+    Clear-Host
+    Write-Host "===== Booster Pack Simulator ====="
+    Write-Host "Selected:  $DisplayName"
+    Write-Host "Collected: $(($Cards | Where-Object { $_.Count -gt 0}).Count) / $($Cards.Count)"
+    Write-Host ""
+    Write-Host "1. Open a booster pack"
+    Write-Host "2. Change current collection"
+    Write-Host "3. View current collection"
+    Write-Host "4. Exit"
+    Write-Host "=================================="
+    $Choice = Read-Host "Choose an option"
+
+    switch ($Choice) {
+        "1" {
+            Get-BoosterPack -CardPool $Cards | Select-Object -Property Number, Name, Rarity, @{N="Notes";E={if ($_.Count -eq 1){"NEW"}}} | Out-Host
+            Read-Host
+        }
+        "2" {
+            Clear-Host
+            Write-Host "===== Booster Pack Simulator ====="
+            Write-Host "1. Base Set"
+            Write-Host "2. Jungle Set"
+            Write-Host "3. Exit"
+            Write-Host "=================================="
+            $Choice2 = Read-Host "Choose an option"
+
+            $CurrentCollection = switch ($Choice2) {
+                "1" { "BaseSet"     }
+                "2" { "JungleSet"   }
+            }
+        }
+        "3" {
+            switch ($CurrentCollection) {
+                "BaseSet"   {
+                    Clear-Host
+                    Write-Host "===== Booster Pack Simulator ====="
+                    Write-Host "Selected:  $DisplayName"
+                    Write-Host "Collected: $(($Cards | Where-Object { $_.Count -gt 0}).Count) / $($Cards.Count)"
+                    Write-Host ""
+                    $CardsBaseSet | Sort-Object -Property Number | Select-Object -Unique -Property Number, @{N="Name";E={if($_.Count -gt 0){$_.Name}else{""}}}, @{N="Rarity";E={if($_.Count -gt 0){$_.Rarity}}}, @{N="Count";E={if($_.Count -gt 0){$_.Count}else{""}}} | Out-Host
+                    Write-Host "=================================="
+                    Read-Host
+                }
+                "JungleSet"   {
+                    Clear-Host
+                    Write-Host "===== Booster Pack Simulator ====="
+                    Write-Host "Selected:  $DisplayName"
+                    Write-Host "Collected: $(($Cards | Where-Object { $_.Count -gt 0}).Count) / $($Cards.Count)"
+                    Write-Host ""
+                    $CardsJungleSet | Sort-Object -Property Number | Select-Object -Unique -Property Number, @{N="Name";E={if($_.Count -gt 0){$_.Name}else{""}}}, @{N="Rarity";E={if($_.Count -gt 0){$_.Rarity}}}, @{N="Count";E={if($_.Count -gt 0){$_.Count}else{""}}} | Out-Host
+                    Write-Host "=================================="
+                    Read-Host
+                }
+            }
+        }
+        "4" {
+            Clear-Host
+            exit
+        }
+        default {
+            Write-Host "Invalid option."
+            Start-Sleep -Milliseconds 500
+        }
+    }
+}
+while ($Choice -ne 4)
