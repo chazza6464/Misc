@@ -1,6 +1,6 @@
 <#
     .SYNOPSIS
-    Simulates opening a pack of Pokémon TCG cards.
+    Simulates opening a pack of Pokemon TCG cards.
 
     .NOTES
     I made this just to mess around with weighted probability.
@@ -8,12 +8,13 @@
 
     .NOTES
     If a duplicate pull happens the first time a card is obtained, it does not display as NEW.
+    I'm working on a way to save and load progress. Just need to decide on how to format the file.
 #>
 
 
 [CmdletBinding()]
 param (
-    [ValidateSet("BaseSet", "JungleSet")]
+    [ValidateSet("BaseSet", "JungleSet", "FossilSet")]
     [string]$CurrentCollection = "BaseSet"
 )
 class Card {
@@ -32,7 +33,8 @@ class Card {
     }
 }
 
-$CardsBaseSet = @(
+$BaseSetPacksOpened = 0
+$BaseSetCards = @(
     #           Name                                Rarity          Number  Weight
     [Card]::new("Alakazam",                         "Holo Rare",    1,      1)
     [Card]::new("Blastoise",                        "Holo Rare",    2,      1)
@@ -109,8 +111,8 @@ $CardsBaseSet = @(
     [Card]::new("Trainer - Impostor Professor Oak", "Rare",         73,     10)
     [Card]::new("Trainer - Item Finder",            "Rare",         74,     10)
     [Card]::new("Trainer - Lass",                   "Rare",         75,     10)
-    [Card]::new("Trainer - Pokémon Breeder",        "Rare",         76,     10)
-    [Card]::new("Trainer - Pokémon Trader",         "Rare",         77,     10)
+    [Card]::new("Trainer - Pokemon Breeder",        "Rare",         76,     10)
+    [Card]::new("Trainer - Pokemon Trader",         "Rare",         77,     10)
     [Card]::new("Trainer - Scoop Up",               "Rare",         78,     10)
     [Card]::new("Trainer - Super Energy Removal",   "Rare",         79,     10)
     [Card]::new("Trainer - Defender",               "Uncommon",     80,     25)
@@ -118,9 +120,9 @@ $CardsBaseSet = @(
     [Card]::new("Trainer - Full Heal",              "Uncommon",     82,     25)
     [Card]::new("Trainer - Maintenance",            "Uncommon",     83,     25)
     [Card]::new("Trainer - PlusPower",              "Uncommon",     84,     25)
-    [Card]::new("Trainer - Pokémon Center",         "Uncommon",     85,     25)
-    [Card]::new("Trainer - Pokémon Flute",          "Uncommon",     86,     25)
-    [Card]::new("Trainer - Pokédex",                "Uncommon",     87,     25)
+    [Card]::new("Trainer - Pokemon Center",         "Uncommon",     85,     25)
+    [Card]::new("Trainer - Pokemon Flute",          "Uncommon",     86,     25)
+    [Card]::new("Trainer - Pokedex",                "Uncommon",     87,     25)
     [Card]::new("Trainer - Professor Oak",          "Uncommon",     88,     25)
     [Card]::new("Trainer - Revive",                 "Uncommon",     89,     25)
     [Card]::new("Trainer - Super Potion",           "Uncommon",     90,     25)
@@ -138,7 +140,8 @@ $CardsBaseSet = @(
     [Card]::new("Energy - Water",                   "Common",       102,    75)
 )
 
-$CardsJungleSet = @(
+$JungleSetPacksOpened = 0
+$JungleSetCards = @(
     #           Name                                Rarity          Number  Weight
     [Card]::new("Clefable",                         "Holo Rare",    1,      1)
     [Card]::new("Electrode",                        "Holo Rare",    2,      1)
@@ -203,7 +206,74 @@ $CardsJungleSet = @(
     [Card]::new("Rhyhorn",                          "Common",       61,     75)
     [Card]::new("Spearow",                          "Common",       62,     75)
     [Card]::new("Venonat",                          "Common",       63,     75)
-    [Card]::new("Poké Ball",                        "Common",       64,     75)
+    [Card]::new("Trainer - Poke Ball",              "Common",       64,     75)
+)
+
+$FossilSetPacksOpened = 0
+$FossilSetCards = @(
+    #           Name                                Rarity          Number  Weight
+    [Card]::new("Aerodactyl",                       "Holo Rare",    1,      1)
+    [Card]::new("Articuno",                         "Holo Rare",    2,      1)
+    [Card]::new("Ditto",                            "Holo Rare",    3,      1)
+    [Card]::new("Dragonite",                        "Holo Rare",    4,      1)
+    [Card]::new("Gengar",                           "Holo Rare",    5,      1)
+    [Card]::new("Haunter",                          "Holo Rare",    6,      1)
+    [Card]::new("Hitmonlee",                        "Holo Rare",    7,      1)
+    [Card]::new("Hypno",                            "Holo Rare",    8,      1)
+    [Card]::new("Kabutops",                         "Holo Rare",    9,      1)
+    [Card]::new("Lapras",                           "Holo Rare",    10,     1)
+    [Card]::new("Magneton",                         "Holo Rare",    11,     1)
+    [Card]::new("Moltres",                          "Holo Rare",    12,     1)
+    [Card]::new("Muk",                              "Holo Rare",    13,     1)
+    [Card]::new("Raichu",                           "Holo Rare",    14,     1)
+    [Card]::new("Zapdos",                           "Holo Rare",    15,     1)
+    [Card]::new("Aerodactyl",                       "Rare",         16,     10)
+    [Card]::new("Articuno",                         "Rare",         17,     10)
+    [Card]::new("Ditto",                            "Rare",         18,     10)
+    [Card]::new("Dragonite",                        "Rare",         19,     10)
+    [Card]::new("Gengar",                           "Rare",         20,     10)
+    [Card]::new("Haunter",                          "Rare",         21,     10)
+    [Card]::new("Hitmonlee",                        "Rare",         22,     10)
+    [Card]::new("Hypno",                            "Rare",         23,     10)
+    [Card]::new("Kabutops",                         "Rare",         24,     10)
+    [Card]::new("Lapras",                           "Rare",         25,     10)
+    [Card]::new("Magneton",                         "Rare",         26,     10)
+    [Card]::new("Moltres",                          "Rare",         27,     10)
+    [Card]::new("Muk",                              "Rare",         28,     10)
+    [Card]::new("Raichu",                           "Rare",         29,     10)
+    [Card]::new("Zapdos",                           "Rare",         30,     10)
+    [Card]::new("Arbok",                            "Uncommon",     31,     25)
+    [Card]::new("Cloyster",                         "Uncommon",     32,     25)
+    [Card]::new("Gastly",                           "Uncommon",     33,     25)
+    [Card]::new("Golbat",                           "Uncommon",     34,     25)
+    [Card]::new("Golduck",                          "Uncommon",     35,     25)
+    [Card]::new("Golem",                            "Uncommon",     36,     25)
+    [Card]::new("Graveler",                         "Uncommon",     37,     25)
+    [Card]::new("Kingler",                          "Uncommon",     38,     25)
+    [Card]::new("Magmar",                           "Uncommon",     39,     25)
+    [Card]::new("Omastar",                          "Uncommon",     40,     25)
+    [Card]::new("Sandslash",                        "Uncommon",     41,     25)
+    [Card]::new("Seadra",                           "Uncommon",     42,     25)
+    [Card]::new("Slowbro",                          "Uncommon",     43,     25)
+    [Card]::new("Tentacruel",                       "Uncommon",     44,     25)
+    [Card]::new("Weezing",                          "Uncommon",     45,     25)
+    [Card]::new("Ekans",                            "Common",       46,     75)
+    [Card]::new("Geodude",                          "Common",       47,     75)
+    [Card]::new("Grimer",                           "Common",       48,     75)
+    [Card]::new("Horsea",                           "Common",       49,     75)
+    [Card]::new("Kabuto",                           "Common",       50,     75)
+    [Card]::new("Krabby",                           "Common",       51,     75)
+    [Card]::new("Omanyte",                          "Common",       52,     75)
+    [Card]::new("Psyduck",                          "Common",       53,     75)
+    [Card]::new("Shellder",                         "Common",       54,     75)
+    [Card]::new("Slowpoke",                         "Common",       55,     75)
+    [Card]::new("Tentacool",                        "Common",       56,     75)
+    [Card]::new("Zubat",                            "Common",       57,     75)
+    [Card]::new("Trainer - Mr. Fuji",               "Uncommon",     58,     25)
+    [Card]::new("Trainer - Energy Search",          "Common",       59,     75)
+    [Card]::new("Trainer - Gambler",                "Common",       60,     75)
+    [Card]::new("Trainer - Recycle",                "Common",       60,     75)
+    [Card]::new("Trainer - Mysterious Fossil",      "Common",       60,     75)
 )
 
 function Get-RandomCard {
@@ -249,8 +319,9 @@ function Get-BoosterPack {
 $RarityOrder = "Common", "Uncommon", "Rare", "Holo Rare"
 do {
     switch ($CurrentCollection) {
-        "BaseSet"   { $DisplayName = "Pokémon TCG Base Set";    $Cards = $CardsBaseSet      }
-        "JungleSet" { $DisplayName = "Pokémon TCG Jungle Set";  $Cards = $CardsJungleSet    }
+        "BaseSet"   { $DisplayName = "Pokemon TCG Base Set";    $Cards = $BaseSetCards      }
+        "JungleSet" { $DisplayName = "Pokemon TCG Jungle Set";  $Cards = $JungleSetCards    }
+        "FossilSet" { $DisplayName = "Pokemon TCG Fossil Set";  $Cards = $FossilSetCards    }
     }
 
     Clear-Host
@@ -268,6 +339,11 @@ do {
     switch ($Choice) {
         "1" {
             Get-BoosterPack -CardPool $Cards | Select-Object -Property Number, Name, Rarity, @{N="Notes";E={if ($_.Count -eq 1){"NEW"}}} | Out-Host
+            switch ($CurrentCollection) {
+                "BaseSet"   { $BaseSetPacksOpened += 1      }
+                "JungleSet" { $JungleSetPacksOpened += 1    }
+                "FossilSet" { $FossilSetPacksOpened += 1    }
+            }
             Read-Host
         }
         "2" {
@@ -275,13 +351,15 @@ do {
             Write-Host "===== Booster Pack Simulator ====="
             Write-Host "1. Base Set"
             Write-Host "2. Jungle Set"
-            Write-Host "3. Exit"
+            Write-Host "3. Fossil Set"
+            Write-Host "4. Exit"
             Write-Host "=================================="
             $Choice2 = Read-Host "Choose an option"
 
             $CurrentCollection = switch ($Choice2) {
                 "1" { "BaseSet"     }
                 "2" { "JungleSet"   }
+                "3" { "FossilSet"   }
             }
         }
         "3" {
@@ -289,20 +367,33 @@ do {
                 "BaseSet"   {
                     Clear-Host
                     Write-Host "===== Booster Pack Simulator ====="
-                    Write-Host "Selected:  $DisplayName"
-                    Write-Host "Collected: $(($Cards | Where-Object { $_.Count -gt 0}).Count) / $($Cards.Count)"
+                    Write-Host "Selected:       $DisplayName"
+                    Write-Host "Collected:      $(($Cards | Where-Object { $_.Count -gt 0}).Count) / $($Cards.Count)"
+                    Write-Host "Packs Opened:   $BaseSetPacksOpened"
                     Write-Host ""
-                    $CardsBaseSet | Sort-Object -Property Number | Select-Object -Unique -Property Number, @{N="Name";E={if($_.Count -gt 0){$_.Name}else{""}}}, @{N="Rarity";E={if($_.Count -gt 0){$_.Rarity}}}, @{N="Count";E={if($_.Count -gt 0){$_.Count}else{""}}} | Out-Host
+                    $BaseSetCards | Sort-Object -Property Number | Select-Object -Unique -Property Number, @{N="Name";E={if($_.Count -gt 0){$_.Name}else{""}}}, @{N="Rarity";E={if($_.Count -gt 0){$_.Rarity}}}, @{N="Count";E={if($_.Count -gt 0){$_.Count}else{""}}} | Out-Host
                     Write-Host "=================================="
                     Read-Host
                 }
                 "JungleSet"   {
                     Clear-Host
                     Write-Host "===== Booster Pack Simulator ====="
-                    Write-Host "Selected:  $DisplayName"
-                    Write-Host "Collected: $(($Cards | Where-Object { $_.Count -gt 0}).Count) / $($Cards.Count)"
+                    Write-Host "Selected:       $DisplayName"
+                    Write-Host "Collected:      $(($Cards | Where-Object { $_.Count -gt 0}).Count) / $($Cards.Count)"
+                    Write-Host "Packs Opened:   $JungleSetPacksOpened"
                     Write-Host ""
-                    $CardsJungleSet | Sort-Object -Property Number | Select-Object -Unique -Property Number, @{N="Name";E={if($_.Count -gt 0){$_.Name}else{""}}}, @{N="Rarity";E={if($_.Count -gt 0){$_.Rarity}}}, @{N="Count";E={if($_.Count -gt 0){$_.Count}else{""}}} | Out-Host
+                    $JungleSetCards | Sort-Object -Property Number | Select-Object -Unique -Property Number, @{N="Name";E={if($_.Count -gt 0){$_.Name}else{""}}}, @{N="Rarity";E={if($_.Count -gt 0){$_.Rarity}}}, @{N="Count";E={if($_.Count -gt 0){$_.Count}else{""}}} | Out-Host
+                    Write-Host "=================================="
+                    Read-Host
+                }
+                "FossilSet"   {
+                    Clear-Host
+                    Write-Host "===== Booster Pack Simulator ====="
+                    Write-Host "Selected:       $DisplayName"
+                    Write-Host "Collected:      $(($Cards | Where-Object { $_.Count -gt 0}).Count) / $($Cards.Count)"
+                    Write-Host "Packs Opened:   $FossilSetPacksOpened"
+                    Write-Host ""
+                    $FossilSetCards | Sort-Object -Property Number | Select-Object -Unique -Property Number, @{N="Name";E={if($_.Count -gt 0){$_.Name}else{""}}}, @{N="Rarity";E={if($_.Count -gt 0){$_.Rarity}}}, @{N="Count";E={if($_.Count -gt 0){$_.Count}else{""}}} | Out-Host
                     Write-Host "=================================="
                     Read-Host
                 }
