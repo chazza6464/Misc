@@ -14,7 +14,7 @@
 
 [CmdletBinding()]
 param (
-    [ValidateSet("BaseSet", "JungleSet", "FossilSet")]
+    [ValidateSet("BaseSet", "JungleSet", "FossilSet", "BaseSet2")]
     [string]$CurrentCollection = "BaseSet"
 )
 class Card {
@@ -135,7 +135,7 @@ $BaseSetCards = @(
     [Card]::new("Energy - Fighting",                "Common",       97,     75)
     [Card]::new("Energy - Fire",                    "Common",       98,     75)
     [Card]::new("Energy - Grass",                   "Common",       99,     75)
-    [Card]::new("Energy - Electric",                "Common",       100,    75)
+    [Card]::new("Energy - Lightning",               "Common",       100,    75)
     [Card]::new("Energy - Psychic",                 "Common",       101,    75)
     [Card]::new("Energy - Water",                   "Common",       102,    75)
 )
@@ -276,6 +276,141 @@ $FossilSetCards = @(
     [Card]::new("Trainer - Mysterious Fossil",      "Common",       60,     75)
 )
 
+$BaseSet2PacksOpened = 0
+$BaseSet2Cards = @(
+    #           Name                                Rarity          Number  Weight
+    [Card]::new("Alakazam",                         "Holo Rare",    1,      1)
+    [Card]::new("Blastoise",                        "Holo Rare",    2,      1)
+    [Card]::new("Chansey",                          "Holo Rare",    3,      1)
+    [Card]::new("Charizard",                        "Holo Rare",    4,      1)
+    [Card]::new("Clefable",                         "Holo Rare",    5,      1)
+    [Card]::new("Clefairy",                         "Holo Rare",    6,      1)
+    [Card]::new("Gyarados",                         "Holo Rare",    7,      1)
+    [Card]::new("Hitmonchan",                       "Holo Rare",    8,      1)
+    [Card]::new("Magneton",                         "Holo Rare",    9,      1)
+    [Card]::new("Mewtwo",                           "Holo Rare",    10,     1)
+    [Card]::new("Nidoking",                         "Holo Rare",    11,     1)
+    [Card]::new("Nidoqueen",                        "Holo Rare",    12,     1)
+    [Card]::new("Ninetales",                        "Holo Rare",    13,     1)
+    [Card]::new("Pidgeot",                          "Holo Rare",    14,     1)
+    [Card]::new("Poliwrath",                        "Holo Rare",    15,     1)
+    [Card]::new("Raichu",                           "Holo Rare",    16,     1)
+    [Card]::new("Scyther",                          "Holo Rare",    17,     1)
+    [Card]::new("Venusaur",                         "Holo Rare",    18,     1)
+    [Card]::new("Wigglytuff",                       "Holo Rare",    19,     1)
+    [Card]::new("Zapdos",                           "Holo Rare",    20,     1)
+    [Card]::new("Beedrill",                         "Rare",         21,     10)
+    [Card]::new("Dragonair",                        "Rare",         22,     10)
+    [Card]::new("Dugtrio",                          "Rare",         23,     10)
+    [Card]::new("Electabuzz",                       "Rare",         24,     10)
+    [Card]::new("Electrode",                        "Rare",         25,     10)
+    [Card]::new("Kangaskhan",                       "Rare",         26,     10)
+    [Card]::new("Mr. Mime",                         "Rare",         27,     10)
+    [Card]::new("Pidgeotto",                        "Rare",         28,     10)
+    [Card]::new("Pinsir",                           "Rare",         29,     10)
+    [Card]::new("Snorlax",                          "Rare",         30,     10)
+    [Card]::new("Venomoth",                         "Rare",         31,     10)
+    [Card]::new("Victreebel",                       "Rare",         32,     10)
+    [Card]::new("Arcanine",                         "Uncommon",     33,     25)
+    [Card]::new("Butterfree",                       "Uncommon",     34,     25)
+    [Card]::new("Charmeleon",                       "Uncommon",     35,     25)
+    [Card]::new("Dewgong",                          "Uncommon",     36,     25)
+    [Card]::new("Dodrio",                           "Uncommon",     37,     25)
+    [Card]::new("Dratini",                          "Uncommon",     38,     25)
+    [Card]::new("Exeggutor",                        "Uncommon",     39,     25)
+    [Card]::new("Farfetch'd",                       "Uncommon",     40,     25)
+    [Card]::new("Fearow",                           "Uncommon",     41,     25)
+    [Card]::new("Growlithe",                        "Uncommon",     42,     25)
+    [Card]::new("Haunter",                          "Uncommon",     43,     25)
+    [Card]::new("Ivysaur",                          "Uncommon",     44,     25)
+    [Card]::new("Jynx",                             "Uncommon",     45,     25)
+    [Card]::new("Kadabra",                          "Uncommon",     46,     25)
+    [Card]::new("Kakuna",                           "Uncommon",     47,     25)
+    [Card]::new("Lickitung",                        "Uncommon",     48,     25)
+    [Card]::new("Machoke",                          "Uncommon",     49,     25)
+    [Card]::new("Magikarp",                         "Uncommon",     50,     25)
+    [Card]::new("Magmar",                           "Uncommon",     51,     25)
+    [Card]::new("Marowak",                          "Uncommon",     52,     25)
+    [Card]::new("Nidorina",                         "Uncommon",     53,     25)
+    [Card]::new("Nidorino",                         "Uncommon",     54,     25)
+    [Card]::new("Parasect",                         "Uncommon",     55,     25)
+    [Card]::new("Persian",                          "Uncommon",     56,     25)
+    [Card]::new("Poliwhirl",                        "Uncommon",     57,     25)
+    [Card]::new("Raticate",                         "Uncommon",     58,     25)
+    [Card]::new("Rhydon",                           "Uncommon",     59,     25)
+    [Card]::new("Seaking",                          "Uncommon",     60,     25)
+    [Card]::new("Seel",                             "Uncommon",     61,     25)
+    [Card]::new("Tauros",                           "Uncommon",     62,     25)
+    [Card]::new("Wartortle",                        "Uncommon",     63,     25)
+    [Card]::new("Weepinbell",                       "Uncommon",     64,     25)
+    [Card]::new("Abra",                             "Common",       65,     75)
+    [Card]::new("Bellsprout",                       "Common",       66,     75)
+    [Card]::new("Bulbasaur",                        "Common",       67,     75)
+    [Card]::new("Caterpie",                         "Common",       68,     75)
+    [Card]::new("Charmander",                       "Common",       69,     75)
+    [Card]::new("Cubone",                           "Common",       70,     75)
+    [Card]::new("Diglett",                          "Common",       71,     75)
+    [Card]::new("Doduo",                            "Common",       72,     75)
+    [Card]::new("Drowzee",                          "Common",       73,     75)
+    [Card]::new("Exeggcute",                        "Common",       74,     75)
+    [Card]::new("Gastly",                           "Common",       75,     75)
+    [Card]::new("Goldeen",                          "Common",       76,     75)
+    [Card]::new("Jigglypuff",                       "Common",       77,     75)
+    [Card]::new("Machop",                           "Common",       78,     75)
+    [Card]::new("Magnemite",                        "Common",       79,     75)
+    [Card]::new("Meowth",                           "Common",       80,     75)
+    [Card]::new("Metapod",                          "Common",       81,     75)
+    [Card]::new("Nidoran ♀",                        "Common",       82,     75)
+    [Card]::new("Nidoran ♂",                        "Common",       83,     75)
+    [Card]::new("Onix",                             "Common",       84,     75)
+    [Card]::new("Paras",                            "Common",       85,     75)
+    [Card]::new("Pidgey",                           "Common",       86,     75)
+    [Card]::new("Pikachu",                          "Common",       87,     75)
+    [Card]::new("Poliwag",                          "Common",       88,     75)
+    [Card]::new("Rattata",                          "Common",       89,     75)
+    [Card]::new("Rhyhorn",                          "Common",       90,     75)
+    [Card]::new("Sandshrew",                        "Common",       91,     75)
+    [Card]::new("Spearow",                          "Common",       92,     75)
+    [Card]::new("Squirtle",                         "Common",       93,     75)
+    [Card]::new("Starmie",                          "Common",       94,     75)
+    [Card]::new("Staryu",                           "Common",       95,     75)
+    [Card]::new("Tangela",                          "Common",       96,     75)
+    [Card]::new("Venonat",                          "Common",       97,     75)
+    [Card]::new("Voltorb",                          "Common",       98,     75)
+    [Card]::new("Vulpix",                           "Common",       99,     75)
+    [Card]::new("Weedle",                           "Common",       100,    75)
+    [Card]::new("Trainer - Computer Search",        "Rare",         101,    10)
+    [Card]::new("Trainer - Imposter Professor Oak", "Rare",         102,    10)
+    [Card]::new("Trainer - Item Finder",            "Rare",         103,    10)
+    [Card]::new("Trainer - Lass",                   "Rare",         104,    10)
+    [Card]::new("Trainer - Pokemon Breeder",        "Rare",         105,    10)
+    [Card]::new("Trainer - Pokemon Trader",         "Rare",         106,    10)
+    [Card]::new("Trainer - Scoop Up",               "Rare",         107,    10)
+    [Card]::new("Trainer - Super Energy Removal",   "Rare",         108,    10)
+    [Card]::new("Trainer - Defender",               "Uncommon",     109,    25)
+    [Card]::new("Trainer - Energy Retrieval",       "Uncommon",     110,    25)
+    [Card]::new("Trainer - Full Heal",              "Uncommon",     111,    25)
+    [Card]::new("Trainer - Maintenance",            "Uncommon",     112,    25)
+    [Card]::new("Trainer - PlusPower",              "Uncommon",     113,    25)
+    [Card]::new("Trainer - Pokemon Center",         "Uncommon",     114,    25)
+    [Card]::new("Trainer - Pokedex",                "Uncommon",     115,    25)
+    [Card]::new("Trainer - Professor Oak",          "Uncommon",     116,    25)
+    [Card]::new("Trainer - Super Potion",           "Uncommon",     117,    25)
+    [Card]::new("Trainer - Bill",                   "Common",       118,    75)
+    [Card]::new("Trainer - Energy Removal",         "Common",       119,    75)
+    [Card]::new("Trainer - Gust of Wind",           "Common",       120,    75)
+    [Card]::new("Trainer - Poke Ball",              "Common",       121,    75)
+    [Card]::new("Trainer - Potion",                 "Common",       122,    75)
+    [Card]::new("Trainer - Switch",                 "Common",       123,    75)
+    [Card]::new("Energy - Double Colorless",        "Common",       124,    75)
+    [Card]::new("Energy - Fighting",                "Common",       125,    75)
+    [Card]::new("Energy - Fire",                    "Common",       126,    75)
+    [Card]::new("Energy - Grass",                   "Common",       127,    75)
+    [Card]::new("Energy - Lightning",               "Common",       128,    75)
+    [Card]::new("Energy - Psychic",                 "Common",       129,    75)
+    [Card]::new("Energy - Water",                   "Common",       130,    75)
+)
+
 function Get-RandomCard {
     [CmdletBinding()]
     param (
@@ -322,6 +457,7 @@ do {
         "BaseSet"   { $DisplayName = "Pokemon TCG Base Set";    $Cards = $BaseSetCards      }
         "JungleSet" { $DisplayName = "Pokemon TCG Jungle Set";  $Cards = $JungleSetCards    }
         "FossilSet" { $DisplayName = "Pokemon TCG Fossil Set";  $Cards = $FossilSetCards    }
+        "BaseSet2"  { $DisplayName = "Pokemon TCG Base Set 2";  $Cards = $BaseSet2Cards     }
     }
 
     Clear-Host
@@ -332,7 +468,7 @@ do {
     Write-Host "1. Open a booster pack"
     Write-Host "2. Change current collection"
     Write-Host "3. View current collection"
-    Write-Host "4. Exit"
+    Write-Host "Q. Exit"
     Write-Host "=================================="
     $Choice = Read-Host "Choose an option"
 
@@ -343,6 +479,7 @@ do {
                 "BaseSet"   { $BaseSetPacksOpened += 1      }
                 "JungleSet" { $JungleSetPacksOpened += 1    }
                 "FossilSet" { $FossilSetPacksOpened += 1    }
+                "BaseSet2"  { $BaseSet2PacksOpened += 1     }
             }
             Read-Host
         }
@@ -352,7 +489,8 @@ do {
             Write-Host "1. Base Set"
             Write-Host "2. Jungle Set"
             Write-Host "3. Fossil Set"
-            Write-Host "4. Exit"
+            Write-Host "4. Base Set 2"
+            Write-Host "Q. Exit"
             Write-Host "=================================="
             $Choice2 = Read-Host "Choose an option"
 
@@ -360,6 +498,7 @@ do {
                 "1" { "BaseSet"     }
                 "2" { "JungleSet"   }
                 "3" { "FossilSet"   }
+                "4" { "BaseSet2"    }
             }
         }
         "3" {
@@ -397,9 +536,20 @@ do {
                     Write-Host "=================================="
                     Read-Host
                 }
+                "BaseSet2"   {
+                    Clear-Host
+                    Write-Host "===== Booster Pack Simulator ====="
+                    Write-Host "Selected:       $DisplayName"
+                    Write-Host "Collected:      $(($Cards | Where-Object { $_.Count -gt 0}).Count) / $($Cards.Count)"
+                    Write-Host "Packs Opened:   $BaseSet2PacksOpened"
+                    Write-Host ""
+                    $BaseSet2Cards | Sort-Object -Property Number | Select-Object -Unique -Property Number, @{N="Name";E={if($_.Count -gt 0){$_.Name}else{""}}}, @{N="Rarity";E={if($_.Count -gt 0){$_.Rarity}}}, @{N="Count";E={if($_.Count -gt 0){$_.Count}else{""}}} | Out-Host
+                    Write-Host "=================================="
+                    Read-Host
+                }
             }
         }
-        "4" {
+        "Q" {
             Clear-Host
             exit
         }
@@ -409,4 +559,4 @@ do {
         }
     }
 }
-while ($Choice -ne 4)
+while ($Choice -ne "Q")
